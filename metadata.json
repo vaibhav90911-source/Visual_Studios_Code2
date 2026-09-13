@@ -1,0 +1,6 @@
+{
+  "name": "Visual Studios",
+  "description": "Shared recording schedule for Visual Studios: log, track and edit every session.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,225 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with assigned system role",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user"
+        },
+        "display_name": {
+          "type": "string",
+          "description": "Display name of the user"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["super_admin", "admin", "staff", "user"],
+          "description": "Access level role in Visual Studios"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO timestamp of user registration"
+        }
+      },
+      "required": ["id", "email", "display_name", "role"]
+    },
+    "Recording": {
+      "title": "Recording",
+      "description": "Studio recording session log and proof",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the recording session"
+        },
+        "session_date": {
+          "type": "string",
+          "description": "Date of the recording session"
+        },
+        "creator": {
+          "type": "string",
+          "description": "Creator or player who requested/recorded"
+        },
+        "assigned_to": {
+          "type": "string",
+          "description": "Staff member assigned to record"
+        },
+        "players": {
+          "type": "string",
+          "description": "Participants list or details"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "completed", "cancelled", "processing"],
+          "description": "Current status of recording session"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes for the session"
+        },
+        "proof_type": {
+          "type": "string",
+          "description": "Proof attachment type (youtube, drive, medal, none)"
+        },
+        "proof_url": {
+          "type": "string",
+          "description": "URL to recording proof"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO timestamp of recording entry creation"
+        }
+      },
+      "required": ["id", "session_date", "creator", "status"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Player session booking request",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the booking"
+        },
+        "playerName": {
+          "type": "string",
+          "description": "Minecraft handle or player name"
+        },
+        "discordTag": {
+          "type": "string",
+          "description": "Discord tag or contact information"
+        },
+        "preferredDate": {
+          "type": "string",
+          "description": "Requested recording date"
+        },
+        "preferredTime": {
+          "type": "string",
+          "description": "Requested time window"
+        },
+        "playersCount": {
+          "type": "number",
+          "description": "Estimated player count"
+        },
+        "gameMode": {
+          "type": "string",
+          "description": "Target game mode / category"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Custom requirements or notes"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "approved", "rejected", "completed", "cancelled"],
+          "description": "Status of the booking request"
+        },
+        "assignedStaff": {
+          "type": "string",
+          "description": "Staff assigned to this booking"
+        },
+        "adminNotes": {
+          "type": "string",
+          "description": "Internal staff notes"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Timestamp when booking was submitted"
+        }
+      },
+      "required": ["id", "playerName", "discordTag", "status"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Studio bulletin or news item",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier"
+        },
+        "title": {
+          "type": "string",
+          "description": "Headline"
+        },
+        "content": {
+          "type": "string",
+          "description": "Announcement body"
+        },
+        "category": {
+          "type": "string",
+          "description": "Tag or category"
+        },
+        "author": {
+          "type": "string",
+          "description": "Author name or role"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["id", "title", "content"]
+    },
+    "StudioContent": {
+      "title": "StudioContent",
+      "description": "Studio rules, policies and configuration content",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Content section identifier"
+        },
+        "rules_title": {
+          "type": "string",
+          "description": "Title of studio rules"
+        },
+        "rules_body": {
+          "type": "string",
+          "description": "Body text of studio rules"
+        },
+        "banner_text": {
+          "type": "string",
+          "description": "Announcement banner text"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "Last update timestamp"
+        },
+        "updated_by": {
+          "type": "string",
+          "description": "Staff member who last updated"
+        }
+      },
+      "required": ["id"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User accounts and permissions directory"
+    },
+    "/recordings/{recordingId}": {
+      "schema": "Recording",
+      "description": "Recorded sessions and proof logs"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Player session bookings and status tracking"
+    },
+    "/announcements/{announcementId}": {
+      "schema": "Announcement",
+      "description": "Public studio announcements"
+    },
+    "/studio_content/{contentId}": {
+      "schema": "StudioContent",
+      "description": "Custom studio rules and configuration content"
+    }
+  }
+}

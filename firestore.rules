@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isFounderOrAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'ksfittnesssingh@gmail.com' ||
+        request.auth.token.email == 'fluxruinmc@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'))
+      );
+    }
+
+    function isStaffOrAbove() {
+      return isSignedIn() && (
+        request.auth.token.email == 'ksfittnesssingh@gmail.com' ||
+        request.auth.token.email == 'fluxruinmc@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['super_admin', 'admin', 'staff']))
+      );
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isValidId(userId);
+    }
+
+    // Recordings Collection
+    match /recordings/{recordingId} {
+      allow read: if true;
+      allow write: if isValidId(recordingId);
+    }
+
+    // Bookings Collection
+    match /bookings/{bookingId} {
+      allow read: if true;
+      allow write: if isValidId(bookingId);
+    }
+
+    // Announcements Collection
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if isValidId(announcementId);
+    }
+
+    // Studio Content Collection
+    match /studio_content/{contentId} {
+      allow read: if true;
+      allow write: if isValidId(contentId);
+    }
+  }
+}
