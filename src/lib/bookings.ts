@@ -194,38 +194,8 @@ export function createBooking(input: {
     console.warn("Firestore booking sync error:", err);
   }
 
-  // 3. Automatically create a pending recording entry so it immediately displays in recording rosters
-  const serverInfo =
-    newBooking.serverType === "player_server"
-      ? `Server (Player): ${newBooking.serverIp || "Provided in Discord"}`
-      : "Server: Visual Studios Dedicated Hosted";
-
-  const notesText = `Booking #${newBooking.id} [${newBooking.tier.toUpperCase()} TIER] (${newBooking.sessionType}) | Creator: ${newBooking.playerName} | Discord: ${newBooking.discordTag}${newBooking.ticketNumber ? ` | Ticket: ${newBooking.ticketNumber}` : ""} | Players: ${newBooking.playersCount} | Duration: ${newBooking.durationHours}h | ${serverInfo} | Time: ${newBooking.preferredTime}. ${newBooking.description ? `Notes: ${newBooking.description}` : ""}`;
-
-  void createRecording({
-    session_date: newBooking.preferredDate || new Date().toISOString().split("T")[0]!,
-    creator: newBooking.playerName,
-    assigned_to: "Unassigned (Awaiting Staff)",
-    players: `${newBooking.playerName} + ${Math.max(0, newBooking.playersCount - 1)} others (${newBooking.discordTag})`,
-    status: "pending",
-    notes: notesText,
-    proof_type: "none",
-    proof_url: "",
-  })
-    .then((rec) => {
-      if (rec?.id) {
-        newBooking.recordingId = rec.id;
-        const currentList = getBookings();
-        const idx = currentList.findIndex((b) => b.id === newBooking.id);
-        if (idx !== -1) {
-          currentList[idx] = newBooking;
-          saveBookings(currentList);
-        }
-      }
-    })
-    .catch((e) => {
-      console.warn("[Bookings] Auto-create recording notice:", e);
-    });
+  // NOTE: Recording is intentionally NOT created here upon submission.
+  // Recording entry is only created when staff/admin accepts & schedules the booking.
 
   return newBooking;
 }
@@ -248,6 +218,42 @@ export function updateBookingStatus(
     assignedStaff: assignedStaff !== undefined ? assignedStaff : current.assignedStaff,
     acceptedAt: status === "accepted" ? new Date().toISOString() : current.acceptedAt,
   });
+
+  // If status is changed to accepted and it doesn't have a recordingId yet, create the recording entry!
+  if (status === "accepted" && !updated.recordingId) {
+    const serverInfoText =
+      updated.serverType === "player_server"
+        ? `Server (Player): ${updated.serverIp || "Provided in Discord"}`
+        : "Server: Visual Studios Dedicated Hosted";
+
+    const notesText = `Booking #${updated.id} [${updated.tier.toUpperCase()} TIER] (${updated.sessionType}) | Creator: ${updated.playerName} | Discord: ${updated.discordTag}${updated.ticketNumber ? ` | Ticket: ${updated.ticketNumber}` : ""} | Players: ${updated.playersCount} | Duration: ${updated.durationHours}h | ${serverInfoText} | Time: ${updated.preferredTime}. ${updated.description ? `Notes: ${updated.description}` : ""}`;
+
+    void createRecording({
+      session_date: updated.preferredDate || new Date().toISOString().split("T")[0]!,
+      creator: updated.playerName,
+      assigned_to: assignedStaff || "Visual Studios Recording Team",
+      players: `${updated.playerName} + ${Math.max(0, updated.playersCount - 1)} others (${updated.discordTag})`,
+      status: "pending",
+      notes: notesText,
+      proof_type: "none",
+      proof_url: "",
+    })
+      .then((rec) => {
+        if (rec?.id) {
+          updated.recordingId = rec.id;
+          const freshList = getBookings();
+          const fIdx = freshList.findIndex((b) => b.id === id);
+          if (fIdx !== -1) {
+            freshList[fIdx] = updated;
+            saveBookings(freshList);
+          }
+          setDoc(doc(db, "bookings", id), { recordingId: rec.id }, { merge: true }).catch(() => {});
+        }
+      })
+      .catch((e) => {
+        console.warn("[Bookings] Create recording on accept error:", e);
+      });
+  }
 
   list[idx] = updated;
   saveBookings(list);

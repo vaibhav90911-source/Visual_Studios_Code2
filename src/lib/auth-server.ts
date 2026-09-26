@@ -129,6 +129,14 @@ export type ResetPassServerInput = {
   newPassword: string;
 };
 
+export type UpdateProfileServerInput = {
+  userId: string;
+  displayName?: string;
+  avatarUrl?: string;
+  currentPassword?: string;
+  newPassword?: string;
+};
+
 // 1. Fetch all users (sanitized for client)
 export const serverGetUsers = createServerFn({ method: "GET" }).handler(
   async (): Promise<AppUser[]> => {
@@ -262,4 +270,41 @@ export const serverResetPassword = createServerFn({ method: "POST" })
     target.passwordHash = data.newPassword;
     await writeUsersToDisk(users);
     return { success: true };
+  });
+
+// 7. Update user profile (avatar, display name, password)
+export const serverUpdateProfile = createServerFn({ method: "POST" })
+  .validator((data: UpdateProfileServerInput) => data)
+  .handler(async ({ data }): Promise<{ success: boolean; user?: AppUser; error?: string }> => {
+    const users = await readUsersFromDisk();
+    const target = users.find(
+      (u) => u.id === data.userId || u.email.toLowerCase() === data.userId.toLowerCase(),
+    );
+
+    if (!target) {
+      return { success: false, error: "User not found." };
+    }
+
+    if (data.displayName && data.displayName.trim()) {
+      target.display_name = data.displayName.trim();
+    }
+
+    if (data.avatarUrl !== undefined) {
+      target.avatar_url = data.avatarUrl;
+    }
+
+    if (data.newPassword) {
+      if (data.currentPassword && target.passwordHash !== data.currentPassword) {
+        return { success: false, error: "Incorrect current password." };
+      }
+      if (data.newPassword.length < 6) {
+        return { success: false, error: "Password must be at least 6 characters." };
+      }
+      target.passwordHash = data.newPassword;
+    }
+
+    await writeUsersToDisk(users);
+
+    const { passwordHash: _, ...safeUser } = target;
+    return { success: true, user: safeUser };
   });

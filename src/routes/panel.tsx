@@ -58,6 +58,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import {
   useAuth,
@@ -418,6 +419,12 @@ function ControlPanelPage() {
       return;
     }
 
+    // Founder or non-Chairman cannot grant Chairman role
+    if (newRole === "chairman" && role !== "chairman") {
+      toast.error("Only a Chairman can grant or assign the Chairman role.");
+      return;
+    }
+
     const myRank = role ? RANK[role] : 0;
     const targetRank = RANK[targetUser.role];
     if (targetRank >= myRank && role !== "chairman") {
@@ -438,6 +445,12 @@ function ControlPanelPage() {
     e.preventDefault();
     if (!newUserEmail || !newUserPass) {
       toast.error("Email and password are required.");
+      return;
+    }
+
+    // Founder or non-Chairman cannot provision Chairman role
+    if (newUserRole === "chairman" && role !== "chairman") {
+      toast.error("Only a Chairman can provision a Chairman account.");
       return;
     }
 
@@ -513,7 +526,7 @@ function ControlPanelPage() {
         : "Visual Studios Recording Team");
 
     try {
-      if (actionModalType === "accept_and_record") {
+      if (actionModalType === "accept_and_record" || actionModalType === "accept") {
         await acceptBookingAndCreateRecording(
           selectedBookingForAction.id,
           staffName,
@@ -525,17 +538,9 @@ function ControlPanelPage() {
         toast.success(
           `Booking #${selectedBookingForAction.id} accepted! Added to official Recordings schedule.`,
         );
-        // Automatically switch to recordings tab as requested
-        setActiveTab("recordings");
-      } else if (actionModalType === "accept") {
-        updateBookingStatus(
-          selectedBookingForAction.id,
-          "accepted",
-          adminNoteInput.trim(),
-          staffName,
-        );
-        refreshBookings();
-        toast.success(`Booking #${selectedBookingForAction.id} marked as accepted!`);
+        if (actionModalType === "accept_and_record") {
+          setActiveTab("recordings");
+        }
       } else if (actionModalType === "reject") {
         updateBookingStatus(
           selectedBookingForAction.id,
@@ -685,114 +690,113 @@ function ControlPanelPage() {
     <SiteLayout>
       <main className="animate-fade-up-late mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
         {/* Top Control Panel Header */}
-        <div className="glass-panel flex flex-col justify-between gap-4 rounded-3xl p-6 sm:flex-row sm:items-center sm:p-8 border-zinc-800">
+        <div className="glass-panel flex flex-col justify-between gap-6 rounded-3xl p-6 sm:flex-row sm:items-center sm:p-8 border-white/10 bg-zinc-950/60 backdrop-blur-xl shadow-2xl">
           <div className="flex items-center gap-4">
             <img
               src={logo.url}
               alt="Visual Studios Logo"
               referrerPolicy="no-referrer"
-              className="h-12 sm:h-14 w-auto aspect-[16/9] rounded-2xl border border-zinc-800 bg-black object-contain shadow-lg shrink-0"
+              className="h-12 sm:h-14 w-auto aspect-[16/9] rounded-2xl border border-white/10 bg-black object-contain shadow-xl shrink-0"
             />
             <div>
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">
-                <ShieldAlert className="h-4 w-4 text-red-400" /> Visual Studios Command Center
+              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+                <ShieldAlert className="h-3.5 w-3.5 text-red-400" /> Command Center
               </div>
-              <h1 className="mt-1 font-display text-3xl font-bold uppercase tracking-wider text-foreground">
+              <h1 className="mt-0.5 font-display text-2xl sm:text-3xl font-extrabold uppercase tracking-wider text-foreground">
                 Control Panel
               </h1>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Logged in as{" "}
-                <span className="font-semibold text-foreground">
-                  {user?.display_name || user?.email}
-                </span>{" "}
-                (
+              <p className="mt-0.5 text-xs text-muted-foreground flex items-center gap-2">
+                <span>
+                  Logged in as{" "}
+                  <strong className="font-semibold text-foreground">
+                    {user?.display_name || user?.email}
+                  </strong>
+                </span>
+                <span className="text-zinc-600">•</span>
                 <span
-                  className={`font-semibold ${
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
                     role === "chairman"
-                      ? "text-amber-400"
+                      ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
                       : role === "super_admin"
-                        ? "text-red-400"
+                        ? "border-red-500/40 bg-red-500/10 text-red-400"
                         : role === "admin"
-                          ? "text-purple-400"
+                          ? "border-purple-500/40 bg-purple-500/10 text-purple-400"
                           : role === "staff"
-                            ? "text-orange-400"
-                            : "text-zinc-300"
+                            ? "border-orange-500/40 bg-orange-500/10 text-orange-400"
+                            : "border-zinc-800 bg-zinc-900 text-zinc-400"
                   }`}
                 >
                   {role ? ROLE_LABEL[role] : "Staff"}
                 </span>
-                )
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Sound alert test and mute controls */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleToggleMute}
-              className={`rounded-full border-zinc-700 bg-zinc-900/50 text-xs ${
-                isAudioMuted
-                  ? "text-zinc-500 hover:text-zinc-300"
-                  : "text-amber-300 hover:text-amber-200"
-              }`}
-              title={
-                isAudioMuted
-                  ? "Audio alerts are currently muted"
-                  : "Audio alerts are active (Chime enabled)"
-              }
-            >
-              {isAudioMuted ? (
-                <>
-                  <VolumeX className="mr-1.5 h-3.5 w-3.5 text-zinc-500" /> Sound: Muted
-                </>
-              ) : (
-                <>
-                  <Volume2 className="mr-1.5 h-3.5 w-3.5 text-amber-400 animate-pulse" /> Sound:
-                  Active
-                </>
-              )}
-            </Button>
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleToggleMute}
+                    className={`rounded-full border-white/10 bg-zinc-900/60 text-xs transition-all ${
+                      isAudioMuted
+                        ? "text-zinc-500 hover:text-zinc-300 hover:border-white/20"
+                        : "text-amber-300 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20"
+                    }`}
+                  >
+                    {isAudioMuted ? (
+                      <VolumeX className="h-3.5 w-3.5 text-zinc-500" />
+                    ) : (
+                      <Volume2 className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-zinc-900 border-zinc-800 text-xs text-zinc-200">
+                  {isAudioMuted ? "Unmute Audio Alerts" : "Mute Audio Alerts"}
+                </TooltipContent>
+              </Tooltip>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleTestChime}
-              className="rounded-full border-zinc-700 bg-zinc-900/50 text-xs text-zinc-300 hover:text-white hover:bg-zinc-800"
-              title="Test notification sound chime"
-            >
-              <Bell className="mr-1.5 h-3.5 w-3.5 text-amber-400" /> Test Chime
-            </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleTestChime}
+                    className="rounded-full border-white/10 bg-zinc-900/60 text-xs text-zinc-300 hover:text-white hover:bg-zinc-800 hover:border-white/20"
+                  >
+                    <Bell className="h-3.5 w-3.5 text-amber-400" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-zinc-900 border-zinc-800 text-xs text-zinc-200">
+                  Test Notification Sound Chime
+                </TooltipContent>
+              </Tooltip>
 
-            <Button
-              asChild
-              variant="outline"
-              className="rounded-full border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:text-white hover:bg-zinc-800"
-            >
-              <Link to="/analytics">
-                <BarChart3 className="mr-2 h-4 w-4 text-zinc-300" /> Staff Analytics & VC
-              </Link>
-            </Button>
+              <Button
+                onClick={handleExportExcel}
+                variant="outline"
+                size="sm"
+                className="rounded-full border-emerald-500/30 bg-emerald-950/20 text-xs text-emerald-300 hover:bg-emerald-950/40 hover:border-emerald-500/50 transition-all gap-1.5"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="hidden sm:inline">Export Excel</span>
+              </Button>
 
-            <Button
-              onClick={handleExportExcel}
-              className="rounded-full border-emerald-500/30 bg-emerald-950/20 text-emerald-300 hover:bg-emerald-950/40"
-            >
-              <FileSpreadsheet className="mr-2 h-4 w-4 text-emerald-400" /> Export Excel Sheet
-              (.xlsx)
-            </Button>
-
-            <Button
-              onClick={handleOpenCreateModal}
-              className="rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-medium shadow-lg"
-            >
-              <Plus className="mr-1.5 h-4 w-4" /> Add Recording
-            </Button>
+              <Button
+                onClick={handleOpenCreateModal}
+                size="sm"
+                className="rounded-full bg-white text-zinc-950 hover:bg-zinc-100 font-semibold text-xs shadow-xl transition-all gap-1.5 px-4"
+              >
+                <Plus className="h-4 w-4" /> Add Recording
+              </Button>
+            </TooltipProvider>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Minimalist Icon Navigation Tabs Bar with Unique Color Overlays */}
         <Tabs
           value={activeTab}
           onValueChange={(v) =>
@@ -800,56 +804,110 @@ function ControlPanelPage() {
           }
           className="space-y-6"
         >
-          <TabsList className="glass-pill h-auto p-1.5 flex flex-wrap border-zinc-800 bg-zinc-950/80">
-            <TabsTrigger
-              value="recordings"
-              className="gap-2 rounded-full px-5 py-2 text-zinc-400 data-[state=active]:bg-white data-[state=active]:text-zinc-900"
-            >
-              <Film className="h-4 w-4" /> Recordings & Schedule ({recordings.length})
-              {myActiveAssignedCount > 0 && (
-                <span className="ml-1 rounded-full bg-amber-500/25 px-2 py-0.5 text-[10px] font-bold text-amber-300 border border-amber-500/40">
-                  {myActiveAssignedCount} Assigned to You
-                </span>
-              )}
-            </TabsTrigger>
+          <TooltipProvider delayDuration={50}>
+            <div className="flex justify-center w-full">
+              <TabsList className="glass-card flex items-center justify-center gap-3 sm:gap-4 rounded-full border border-white/10 bg-zinc-950/90 p-2 shadow-2xl backdrop-blur-2xl transition-all">
+                {/* 1. Recordings & Schedule (Cyan Overlay) */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger
+                      value="recordings"
+                      className="group relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-transparent text-zinc-400 transition-all duration-300 hover:text-cyan-300 hover:bg-cyan-500/10 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-300 data-[state=active]:border-cyan-400/50 data-[state=active]:shadow-[0_0_25px_rgba(6,182,212,0.45)]"
+                    >
+                      <Film className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110 group-data-[state=active]:text-cyan-300" />
+                      <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-cyan-400 opacity-0 transition-all duration-300 group-data-[state=active]:opacity-100 group-data-[state=active]:shadow-[0_0_8px_#22d3ee]" />
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    className="bg-zinc-900 border-zinc-800 text-xs font-semibold text-cyan-200 shadow-xl"
+                  >
+                    Recordings & Schedule
+                  </TooltipContent>
+                </Tooltip>
 
-            <TabsTrigger
-              value="bookings"
-              className="gap-2 rounded-full px-5 py-2 text-zinc-400 data-[state=active]:bg-white data-[state=active]:text-zinc-900"
-            >
-              <Calendar className="h-4 w-4" /> Player Bookings ({bookings.length})
-              {pendingBookingsCount > 0 && (
-                <span className="ml-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 animate-pulse border border-amber-500/30">
-                  {pendingBookingsCount} New
-                </span>
-              )}
-            </TabsTrigger>
+                {/* 2. Player Bookings (Emerald Overlay) */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger
+                      value="bookings"
+                      className="group relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-transparent text-zinc-400 transition-all duration-300 hover:text-emerald-300 hover:bg-emerald-500/10 data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-300 data-[state=active]:border-emerald-400/50 data-[state=active]:shadow-[0_0_25px_rgba(16,185,129,0.45)]"
+                    >
+                      <Calendar className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110 group-data-[state=active]:text-emerald-300" />
+                      <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-emerald-400 opacity-0 transition-all duration-300 group-data-[state=active]:opacity-100 group-data-[state=active]:shadow-[0_0_8px_#34d399]" />
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    className="bg-zinc-900 border-zinc-800 text-xs font-semibold text-emerald-200 shadow-xl"
+                  >
+                    Player Bookings
+                  </TooltipContent>
+                </Tooltip>
 
-            <TabsTrigger
-              value="analytics"
-              className="gap-2 rounded-full px-5 py-2 text-zinc-400 data-[state=active]:bg-white data-[state=active]:text-zinc-900"
-            >
-              <BarChart3 className="h-4 w-4" /> Staff Analytics & VC
-            </TabsTrigger>
+                {/* 3. Staff Analytics (Purple Overlay) */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger
+                      value="analytics"
+                      className="group relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-transparent text-zinc-400 transition-all duration-300 hover:text-purple-300 hover:bg-purple-500/10 data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-300 data-[state=active]:border-purple-400/50 data-[state=active]:shadow-[0_0_25px_rgba(168,85,247,0.45)]"
+                    >
+                      <BarChart3 className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110 group-data-[state=active]:text-purple-300" />
+                      <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-purple-400 opacity-0 transition-all duration-300 group-data-[state=active]:opacity-100 group-data-[state=active]:shadow-[0_0_8px_#c084fc]" />
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    className="bg-zinc-900 border-zinc-800 text-xs font-semibold text-purple-200 shadow-xl"
+                  >
+                    Staff Analytics & VC Activity
+                  </TooltipContent>
+                </Tooltip>
 
-            {isAdminOrSuperAdmin(role) && (
-              <TabsTrigger
-                value="roles"
-                className="gap-2 rounded-full px-5 py-2 text-zinc-400 data-[state=active]:bg-white data-[state=active]:text-zinc-900"
-              >
-                <Users className="h-4 w-4" /> Player Roles & Permissions ({allUsers.length})
-              </TabsTrigger>
-            )}
+                {/* 4. Player Permissions (Amber Overlay) */}
+                {isAdminOrSuperAdmin(role) && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger
+                        value="roles"
+                        className="group relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-transparent text-zinc-400 transition-all duration-300 hover:text-amber-300 hover:bg-amber-500/10 data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-300 data-[state=active]:border-amber-400/50 data-[state=active]:shadow-[0_0_25px_rgba(245,158,11,0.45)]"
+                      >
+                        <Users className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110 group-data-[state=active]:text-amber-300" />
+                        <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-amber-400 opacity-0 transition-all duration-300 group-data-[state=active]:opacity-100 group-data-[state=active]:shadow-[0_0_8px_#fbbf24]" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      className="bg-zinc-900 border-zinc-800 text-xs font-semibold text-amber-200 shadow-xl"
+                    >
+                      Player Roles & Permissions
+                    </TooltipContent>
+                  </Tooltip>
+                )}
 
-            {isSuperAdmin(role) && (
-              <TabsTrigger
-                value="content"
-                className="gap-2 rounded-full px-5 py-2 text-zinc-400 data-[state=active]:bg-white data-[state=active]:text-zinc-900"
-              >
-                <Globe className="h-4 w-4" /> Site Content (Rules & About)
-              </TabsTrigger>
-            )}
-          </TabsList>
+                {/* 5. Site Content (Rose Overlay) */}
+                {isSuperAdmin(role) && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger
+                        value="content"
+                        className="group relative flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-transparent text-zinc-400 transition-all duration-300 hover:text-rose-300 hover:bg-rose-500/10 data-[state=active]:bg-rose-500/20 data-[state=active]:text-rose-300 data-[state=active]:border-rose-400/50 data-[state=active]:shadow-[0_0_25px_rgba(244,63,94,0.45)]"
+                      >
+                        <Globe className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 group-data-[state=active]:scale-110 group-data-[state=active]:text-rose-300" />
+                        <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-rose-400 opacity-0 transition-all duration-300 group-data-[state=active]:opacity-100 group-data-[state=active]:shadow-[0_0_8px_#fb7185]" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      className="bg-zinc-900 border-zinc-800 text-xs font-semibold text-rose-200 shadow-xl"
+                    >
+                      Site Content & Rules
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </TabsList>
+            </div>
+          </TooltipProvider>
 
           {/* TAB 1: RECORDINGS & EXCEL EXPORT */}
           <TabsContent value="recordings" className="space-y-6">
@@ -886,7 +944,7 @@ function ControlPanelPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search recordings by creator, date, notes, staff…"
+                  placeholder="Search Recordings..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="rounded-xl pl-9"
@@ -894,22 +952,33 @@ function ControlPanelPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                {/* Assigned to Me Filter Toggle */}
-                <Button
-                  variant={assignedToMeOnly ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setAssignedToMeOnly(!assignedToMeOnly)}
-                  className={`rounded-xl text-xs font-semibold ${
-                    assignedToMeOnly
-                      ? "bg-amber-500 hover:bg-amber-400 text-black shadow-md shadow-amber-500/20"
-                      : "border-zinc-800 hover:border-amber-500/40 text-amber-300 hover:bg-amber-500/10"
-                  }`}
-                >
-                  <UserCheck className="mr-1.5 h-3.5 w-3.5" />
-                  {assignedToMeOnly
-                    ? "Showing: My Assigned"
-                    : `Assigned to Me (${myAssignedRecordings.length})`}
-                </Button>
+                {/* Assigned to Me Filter Toggle - Icon Only in Yellow */}
+                <TooltipProvider delayDuration={50}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setAssignedToMeOnly(!assignedToMeOnly)}
+                        className={`h-9 w-9 rounded-xl transition-all duration-300 ${
+                          assignedToMeOnly
+                            ? "bg-amber-400/20 border-amber-400/60 text-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.4)] scale-105"
+                            : "border-zinc-800 hover:border-amber-400/40 bg-zinc-900/50 hover:bg-amber-400/10"
+                        }`}
+                      >
+                        <UserCheck className="h-4 w-4 text-amber-400" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      className="bg-zinc-900 border-zinc-800 text-xs font-semibold text-amber-200 shadow-xl"
+                    >
+                      {assignedToMeOnly
+                        ? "Assigned to Me (Active)"
+                        : `Assigned to Me (${myAssignedRecordings.length})`}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground whitespace-nowrap">Status:</span>
@@ -1099,63 +1168,65 @@ function ControlPanelPage() {
           {/* TAB: PLAYER BOOKINGS & REQUESTS */}
           <TabsContent value="bookings" className="space-y-6">
             {/* Stat Counters */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="glass-card rounded-2xl p-4 border-zinc-800">
-                <div className="text-xs text-muted-foreground uppercase font-semibold">
+            <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-4 backdrop-blur-md">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Total Bookings
                 </div>
-                <div className="mt-1 font-display text-2xl font-bold text-white">
+                <div className="mt-2 font-display text-2xl font-extrabold text-white">
                   {bookings.length}
                 </div>
               </div>
 
-              <div className="glass-card rounded-2xl p-4 border-amber-500/30 bg-amber-500/5">
-                <div className="text-xs text-amber-400 uppercase font-semibold flex items-center gap-1">
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 backdrop-blur-md">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5" /> Pending Review
                 </div>
-                <div className="mt-1 font-display text-2xl font-bold text-amber-300">
+                <div className="mt-2 font-display text-2xl font-extrabold text-amber-300">
                   {pendingBookingsCount}
                 </div>
               </div>
 
-              <div className="glass-card rounded-2xl p-4 border-emerald-500/30 bg-emerald-500/5">
-                <div className="text-xs text-emerald-400 uppercase font-semibold flex items-center gap-1">
+              <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4 backdrop-blur-md">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Accepted & Scheduled
                 </div>
-                <div className="mt-1 font-display text-2xl font-bold text-emerald-300">
+                <div className="mt-2 font-display text-2xl font-extrabold text-emerald-300">
                   {bookings.filter((b) => b.status === "accepted").length}
                 </div>
               </div>
 
-              <div className="glass-card rounded-2xl p-4 border-zinc-800">
-                <div className="text-xs text-muted-foreground uppercase font-semibold">
+              <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-4 backdrop-blur-md">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Revision / Declined
                 </div>
-                <div className="mt-1 font-display text-2xl font-bold text-zinc-400">
+                <div className="mt-2 font-display text-2xl font-extrabold text-zinc-400">
                   {bookings.filter((b) => b.status === "rejected").length}
                 </div>
               </div>
             </div>
 
             {/* Filters & Navigation Bar */}
-            <div className="glass-card flex flex-col gap-3 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="glass-panel flex flex-col gap-3 rounded-2xl p-3.5 border border-white/10 bg-zinc-950/40 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search player name, Discord handle, booking ID, concept…"
                   value={bookingSearch}
                   onChange={(e) => setBookingSearch(e.target.value)}
-                  className="rounded-xl pl-9"
+                  className="rounded-xl pl-9 h-9 border-white/10 bg-zinc-900/60 text-xs"
                 />
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">Status:</span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
+                  Status:
+                </span>
                 <Select value={bookingStatusFilter} onValueChange={setBookingStatusFilter}>
-                  <SelectTrigger className="w-[150px] rounded-xl">
+                  <SelectTrigger className="w-[150px] h-9 rounded-xl border-white/10 bg-zinc-900/60 text-xs">
                     <SelectValue placeholder="All Statuses" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border-white/10 bg-zinc-950 text-xs">
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="accepted">Accepted</SelectItem>
@@ -1167,7 +1238,7 @@ function ControlPanelPage() {
                   asChild
                   variant="outline"
                   size="sm"
-                  className="rounded-xl border-purple-500/30 text-purple-300 hover:bg-purple-950/30"
+                  className="rounded-full border-purple-500/30 bg-purple-500/10 text-xs font-semibold text-purple-300 hover:bg-purple-500/20"
                 >
                   <Link to="/booking">
                     <ArrowRight className="mr-1.5 h-3.5 w-3.5" /> Open Booking Page
@@ -1178,25 +1249,25 @@ function ControlPanelPage() {
 
             {/* Bookings List */}
             {filteredBookings.length === 0 ? (
-              <div className="glass-panel rounded-3xl p-12 text-center">
-                <Inbox className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-3 font-display text-lg font-semibold uppercase text-white">
+              <div className="glass-panel rounded-3xl border border-dashed border-white/10 bg-zinc-950/40 p-12 text-center">
+                <Inbox className="mx-auto h-10 w-10 text-muted-foreground/40" />
+                <h3 className="mt-3 font-display text-base font-bold uppercase text-white">
                   No Booking Requests Found
                 </h3>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1 text-xs text-muted-foreground max-w-md mx-auto">
                   {bookingSearch || bookingStatusFilter !== "all"
                     ? "No bookings match your current filter settings."
                     : "No player booking requests submitted yet. Players can submit booking requests at /booking."}
                 </p>
                 <Button
                   asChild
-                  className="mt-4 rounded-full bg-purple-600 hover:bg-purple-500 text-white"
+                  className="mt-4 rounded-full bg-purple-600 px-6 text-xs text-white hover:bg-purple-500"
                 >
                   <Link to="/booking">Go to Booking Page</Link>
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-3.5">
                 {filteredBookings.map((b) => {
                   const isAccepted = b.status === "accepted";
                   const isPending = b.status === "pending";
@@ -1205,18 +1276,18 @@ function ControlPanelPage() {
                   return (
                     <div
                       key={b.id}
-                      className={`glass-panel relative rounded-3xl p-6 transition hover:border-zinc-700 ${
+                      className={`glass-panel relative rounded-2xl p-5 backdrop-blur-md transition hover:-translate-y-0.5 ${
                         isAccepted
-                          ? "border-emerald-500/40 bg-emerald-950/10"
+                          ? "border-emerald-500/30 bg-emerald-950/10 hover:border-emerald-500/50"
                           : isPending
-                            ? "border-amber-500/30 bg-amber-950/10"
-                            : "border-zinc-800"
+                            ? "border-amber-500/30 bg-amber-950/10 hover:border-amber-500/50"
+                            : "border-white/10 bg-zinc-900/40 hover:border-white/20"
                       }`}
                     >
                       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div className="space-y-3 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-mono text-xs font-bold text-purple-400 bg-purple-950/60 border border-purple-800/60 px-2.5 py-0.5 rounded-lg">
+                            <span className="font-mono text-[11px] font-bold text-purple-300 bg-purple-950/60 border border-purple-800/60 px-2.5 py-0.5 rounded-md">
                               #{b.id}
                             </span>
                             <h4 className="font-display text-base font-bold text-white uppercase tracking-wide">
@@ -1224,27 +1295,27 @@ function ControlPanelPage() {
                             </h4>
 
                             {b.tier === "paid" ? (
-                              <Badge className="border-purple-500/40 bg-purple-500/20 text-purple-300 gap-1 px-2.5 py-0.5 text-xs">
+                              <Badge className="border-purple-500/40 bg-purple-500/20 text-purple-300 gap-1 px-2.5 py-0.5 text-[11px]">
                                 <Crown className="h-3 w-3 text-purple-400" /> VIP Plan
                               </Badge>
                             ) : (
-                              <Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 gap-1 px-2.5 py-0.5 text-xs">
+                              <Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 gap-1 px-2.5 py-0.5 text-[11px]">
                                 Free Tier
                               </Badge>
                             )}
 
                             {isAccepted && (
-                              <Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 gap-1 px-2.5 py-0.5 text-xs">
+                              <Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 gap-1 px-2.5 py-0.5 text-[11px]">
                                 <CheckCircle2 className="h-3 w-3" /> Accepted & Scheduled
                               </Badge>
                             )}
                             {isPending && (
-                              <Badge className="border-amber-500/30 bg-amber-500/10 text-amber-300 gap-1 px-2.5 py-0.5 text-xs animate-pulse">
+                              <Badge className="border-amber-500/30 bg-amber-500/10 text-amber-300 gap-1 px-2.5 py-0.5 text-[11px] animate-pulse">
                                 <Clock className="h-3 w-3" /> Pending Review
                               </Badge>
                             )}
                             {isRejected && (
-                              <Badge className="border-rose-500/30 bg-rose-500/10 text-rose-400 gap-1 px-2.5 py-0.5 text-xs">
+                              <Badge className="border-rose-500/30 bg-rose-500/10 text-rose-400 gap-1 px-2.5 py-0.5 text-[11px]">
                                 <AlertTriangle className="h-3 w-3" /> Needs Revision
                               </Badge>
                             )}
@@ -1262,49 +1333,51 @@ function ControlPanelPage() {
                           </div>
 
                           {/* Player & Schedule info grid */}
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-2.5">
-                              <span className="text-zinc-500 block text-[10px] uppercase font-semibold">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                            <div className="rounded-xl border border-white/5 bg-zinc-950/60 p-2.5">
+                              <span className="text-zinc-500 block text-[10px] uppercase font-semibold tracking-wider">
                                 Creator Handle
                               </span>
-                              <strong className="text-white">{b.playerName}</strong>
+                              <strong className="text-white font-medium">{b.playerName}</strong>
                               <span className="block text-zinc-400 text-[11px]">
                                 {b.discordTag}
                               </span>
                             </div>
 
-                            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-2.5">
-                              <span className="text-zinc-500 block text-[10px] uppercase font-semibold">
+                            <div className="rounded-xl border border-white/5 bg-zinc-950/60 p-2.5">
+                              <span className="text-zinc-500 block text-[10px] uppercase font-semibold tracking-wider">
                                 Requested Date
                               </span>
-                              <strong className="text-white">{b.preferredDate}</strong>
+                              <strong className="text-white font-medium">{b.preferredDate}</strong>
                               <span className="block text-purple-300 text-[11px]">
                                 {b.preferredTime}
                               </span>
                             </div>
 
-                            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-2.5">
-                              <span className="text-zinc-500 block text-[10px] uppercase font-semibold">
+                            <div className="rounded-xl border border-white/5 bg-zinc-950/60 p-2.5">
+                              <span className="text-zinc-500 block text-[10px] uppercase font-semibold tracking-wider">
                                 Scale & Duration
                               </span>
-                              <strong className="text-white">{b.durationHours} Hours</strong>
+                              <strong className="text-white font-medium">
+                                {b.durationHours} Hours
+                              </strong>
                               <span className="block text-zinc-400 text-[11px]">
                                 {b.playersCount} Players
                               </span>
                             </div>
 
-                            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-2.5">
-                              <span className="text-zinc-500 block text-[10px] uppercase font-semibold">
+                            <div className="rounded-xl border border-white/5 bg-zinc-950/60 p-2.5">
+                              <span className="text-zinc-500 block text-[10px] uppercase font-semibold tracking-wider">
                                 Server Hosting
                               </span>
                               {b.serverType === "studio_hosted" ? (
-                                <strong className="text-purple-300 text-[11px] flex items-center gap-1">
+                                <strong className="text-purple-300 text-[11px] flex items-center gap-1 font-medium">
                                   <Server className="h-3 w-3 text-purple-400" />
                                   Studio Hosted
                                 </strong>
                               ) : (
                                 <div className="truncate">
-                                  <strong className="text-emerald-300 text-[11px] flex items-center gap-1">
+                                  <strong className="text-emerald-300 text-[11px] flex items-center gap-1 font-medium">
                                     <Server className="h-3 w-3 text-emerald-400" />
                                     Player Server
                                   </strong>
@@ -1318,7 +1391,7 @@ function ControlPanelPage() {
 
                           {/* Notes */}
                           {b.description && (
-                            <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/30 p-3 text-xs text-zinc-300">
+                            <div className="rounded-xl border border-white/5 bg-zinc-950/40 p-3 text-xs text-zinc-300">
                               <span className="font-semibold text-zinc-400 text-[10px] uppercase tracking-wider block mb-0.5">
                                 Player Note:
                               </span>
@@ -1328,13 +1401,13 @@ function ControlPanelPage() {
 
                           {/* Admin Notes */}
                           {b.adminNotes && (
-                            <div className="rounded-xl border border-purple-500/30 bg-purple-950/20 p-3 text-xs text-purple-200">
+                            <div className="rounded-xl border border-purple-500/20 bg-purple-950/30 p-3 text-xs text-purple-200">
                               <span className="font-semibold text-purple-300 text-[10px] uppercase tracking-wider block mb-0.5">
                                 Staff Response Note:
                               </span>
                               {b.adminNotes}
                               {b.assignedStaff && (
-                                <span className="block mt-1 text-[11px] text-purple-300/70">
+                                <span className="block mt-1 text-[11px] text-purple-300/70 font-medium">
                                   Handled by: {b.assignedStaff}
                                 </span>
                               )}
@@ -1343,7 +1416,7 @@ function ControlPanelPage() {
                         </div>
 
                         {/* Action Buttons Column */}
-                        <div className="flex flex-col gap-2 shrink-0 md:min-w-[200px]">
+                        <div className="flex flex-col gap-2 shrink-0 md:min-w-[190px]">
                           {isPending && (
                             <>
                               <Button
@@ -1352,7 +1425,7 @@ function ControlPanelPage() {
                                 className="rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold shadow-lg shadow-purple-600/30 text-xs py-2"
                               >
                                 <CheckCircle2 className="mr-1.5 h-3.5 w-3.5 text-emerald-300" />
-                                Accept & Add to Schedule
+                                Accept & Add Schedule
                               </Button>
 
                               <Button
@@ -1380,17 +1453,17 @@ function ControlPanelPage() {
                               <Button
                                 size="sm"
                                 onClick={() => setActiveTab("recordings")}
-                                className="rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs"
+                                className="rounded-xl bg-zinc-900 border border-white/10 hover:bg-zinc-800 text-white text-xs"
                               >
                                 <Film className="mr-1.5 h-3.5 w-3.5 text-purple-400" />
-                                View in Recordings Tab
+                                View in Recordings
                               </Button>
 
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleOpenBookingAction(b, "accept")}
-                                className="rounded-xl border-zinc-800 text-zinc-300 text-xs"
+                                className="rounded-xl border-white/10 text-zinc-300 text-xs hover:bg-white/5"
                               >
                                 <Edit className="mr-1.5 h-3.5 w-3.5" /> Edit Note
                               </Button>
@@ -1428,20 +1501,21 @@ function ControlPanelPage() {
           {/* TAB 2: ROLES & PLAYERS */}
           {isAdminOrSuperAdmin(role) && (
             <TabsContent value="roles" className="space-y-6">
-              <div className="glass-card flex flex-col justify-between gap-4 rounded-2xl p-5 sm:flex-row sm:items-center">
+              {/* Clean Header Bar */}
+              <div className="glass-panel flex flex-col justify-between gap-4 rounded-3xl p-6 border-white/10 bg-zinc-950/60 backdrop-blur-xl sm:flex-row sm:items-center">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-display text-xl font-bold uppercase">
-                      Role & Player Permissions
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="font-display text-xl font-extrabold uppercase tracking-wide text-foreground">
+                      Player & Staff Permissions
                     </h3>
                     <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Live Sync Active
+                      Live Sync
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Founders and Chairmen can grant or modify roles (Chairman, Founder, Manager,
-                    Recording Team, Player) with instant real-time synchronization.
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Manage system clearance across Chairman, Founder, Manager, Staff, and Player
+                    roles.
                   </p>
                 </div>
 
@@ -1453,57 +1527,59 @@ function ControlPanelPage() {
                       setIsRefreshingUsers(true);
                       await refreshUsers();
                       setIsRefreshingUsers(false);
-                      toast.success("User directory updated from central database!");
+                      toast.success("User directory updated");
                     }}
-                    className="rounded-full gap-1.5 border-glass-border hover:bg-glass-highlight"
+                    className="rounded-full text-xs gap-1.5 border-white/10 bg-zinc-900/60 hover:bg-zinc-800 transition-all text-zinc-300"
                   >
                     <RefreshCw
-                      className={`h-3.5 w-3.5 ${isRefreshingUsers ? "animate-spin" : ""}`}
+                      className={`h-3.5 w-3.5 ${isRefreshingUsers ? "animate-spin text-purple-400" : ""}`}
                     />
-                    Refresh Directory
+                    Refresh
                   </Button>
 
                   {canManageRoles(role) && (
                     <Button
                       onClick={() => setIsAddUserOpen(!isAddUserOpen)}
-                      className="rounded-full shadow-lg shadow-purple-600/25 bg-purple-600 hover:bg-purple-500 text-white gap-1.5"
+                      size="sm"
+                      className="rounded-full shadow-lg shadow-purple-600/20 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs gap-1.5 px-4"
                     >
-                      <UserPlus className="h-4 w-4" /> Provision Staff / User Account
+                      <UserPlus className="h-3.5 w-3.5" />
+                      Provision Account
                     </Button>
                   )}
                 </div>
               </div>
 
               {/* Search & Filter Bar */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 glass-card rounded-2xl p-3">
-                <div className="relative w-full sm:w-72">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 glass-panel rounded-2xl p-3 border-white/5 bg-zinc-950/40">
+                <div className="relative w-full sm:w-80">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                   <Input
                     placeholder="Search by name, email, or role…"
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
-                    className="pl-9 rounded-xl border-glass-border bg-background/40 text-sm"
+                    className="pl-9 pr-8 rounded-xl border-white/10 bg-zinc-900/50 text-xs h-9"
                   />
                   {userSearch && (
                     <button
                       type="button"
                       onClick={() => setUserSearch("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs"
                     >
-                      Clear
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    Filter Role:
+                  <span className="text-xs text-zinc-400 whitespace-nowrap font-medium">
+                    Filter:
                   </span>
                   <Select value={userRoleFilter} onValueChange={setUserRoleFilter}>
-                    <SelectTrigger className="w-[160px] rounded-xl text-xs h-9 border-glass-border bg-background/40">
+                    <SelectTrigger className="w-[160px] rounded-xl text-xs h-9 border-white/10 bg-zinc-900/50 text-zinc-200">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-zinc-900 border-zinc-800 text-xs">
                       <SelectItem value="all">All Roles ({allUsers.length})</SelectItem>
                       {ROLES.map((r) => {
                         const count = allUsers.filter((u) => u.role === r).length;
@@ -1516,37 +1592,39 @@ function ControlPanelPage() {
                     </SelectContent>
                   </Select>
 
-                  <span className="text-xs text-muted-foreground font-medium px-2 py-1 rounded-lg bg-glass-highlight border border-glass-border">
-                    {filteredUsers.length} shown
+                  <span className="text-xs text-zinc-400 font-semibold px-2.5 py-1 rounded-xl bg-zinc-900/80 border border-white/5">
+                    {filteredUsers.length} Users
                   </span>
                 </div>
               </div>
 
               {/* Add User Form Drawer */}
               {isAddUserOpen && (
-                <div className="glass-panel animate-fade-up rounded-3xl p-6 sm:p-8 border-purple-500/30">
-                  <div className="flex items-center justify-between">
+                <div className="glass-panel animate-fade-up rounded-3xl p-6 sm:p-7 border-purple-500/30 bg-zinc-950/80 shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-4">
                     <div>
-                      <h4 className="font-display text-lg font-bold uppercase text-white">
-                        Provision New Account
+                      <h4 className="font-display text-base font-bold uppercase tracking-wider text-purple-300 flex items-center gap-2">
+                        <UserPlus className="h-4 w-4 text-purple-400" />
+                        Provision New Staff / Player Account
                       </h4>
-                      <p className="text-xs text-muted-foreground">
-                        Enter staff/player email, password, display name, and role. The account is
-                        saved to the central database and can log in immediately.
+                      <p className="text-xs text-zinc-400 mt-0.5">
+                        Create immediate login credentials synced with the central database.
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setIsAddUserOpen(false)}
-                      className="text-muted-foreground hover:text-foreground"
+                      className="text-zinc-400 hover:text-white rounded-full p-1 transition-colors"
                     >
-                      <X className="h-5 w-5" />
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
 
-                  <form onSubmit={handleAddUser} className="mt-4 grid gap-4 sm:grid-cols-2">
-                    <div className="grid gap-2">
-                      <Label htmlFor="new-email">Email Address</Label>
+                  <form onSubmit={handleAddUser} className="mt-5 grid gap-4 sm:grid-cols-2 text-xs">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="new-email" className="text-xs font-semibold text-zinc-300">
+                        Email Address
+                      </Label>
                       <Input
                         id="new-email"
                         type="email"
@@ -1554,23 +1632,27 @@ function ControlPanelPage() {
                         placeholder="staff@visualstudios.club"
                         value={newUserEmail}
                         onChange={(e) => setNewUserEmail(e.target.value)}
-                        className="rounded-xl"
+                        className="rounded-xl border-white/10 bg-zinc-900/60 text-xs h-9"
                       />
                     </div>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="new-name">Display / Staff Name</Label>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="new-name" className="text-xs font-semibold text-zinc-300">
+                        Display Name
+                      </Label>
                       <Input
                         id="new-name"
-                        placeholder="Staff Name / Handle"
+                        placeholder="Staff / Player Name"
                         value={newUserName}
                         onChange={(e) => setNewUserName(e.target.value)}
-                        className="rounded-xl"
+                        className="rounded-xl border-white/10 bg-zinc-900/60 text-xs h-9"
                       />
                     </div>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="new-pass">Password</Label>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="new-pass" className="text-xs font-semibold text-zinc-300">
+                        Password
+                      </Label>
                       <Input
                         id="new-pass"
                         type="password"
@@ -1578,21 +1660,26 @@ function ControlPanelPage() {
                         placeholder="At least 6 characters"
                         value={newUserPass}
                         onChange={(e) => setNewUserPass(e.target.value)}
-                        className="rounded-xl"
+                        className="rounded-xl border-white/10 bg-zinc-900/60 text-xs h-9"
                       />
                     </div>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="new-role">Assigned Role</Label>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="new-role" className="text-xs font-semibold text-zinc-300">
+                        Assigned Role
+                      </Label>
                       <Select
                         value={newUserRole}
                         onValueChange={(val) => setNewUserRole(val as AppRole)}
                       >
-                        <SelectTrigger id="new-role" className="rounded-xl">
+                        <SelectTrigger
+                          id="new-role"
+                          className="rounded-xl border-white/10 bg-zinc-900/60 text-xs h-9"
+                        >
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          {ROLES.map((r) => (
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-xs">
+                          {ROLES.filter((r) => r !== "chairman" || role === "chairman").map((r) => (
                             <SelectItem key={r} value={r}>
                               {ROLE_LABEL[r]}
                             </SelectItem>
@@ -1601,43 +1688,45 @@ function ControlPanelPage() {
                       </Select>
                     </div>
 
-                    <div className="sm:col-span-2 mt-2 flex justify-end gap-2">
+                    <div className="sm:col-span-2 mt-2 flex justify-end gap-2 pt-2 border-t border-white/5">
                       <Button
                         type="button"
                         variant="ghost"
-                        className="rounded-full"
+                        size="sm"
+                        className="rounded-full text-xs text-zinc-400 hover:text-white"
                         onClick={() => setIsAddUserOpen(false)}
                       >
                         Cancel
                       </Button>
                       <Button
                         type="submit"
-                        className="rounded-full shadow-lg shadow-purple-600/25 bg-purple-600 hover:bg-purple-500 text-white"
+                        size="sm"
+                        className="rounded-full shadow-lg shadow-purple-600/25 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs px-5"
                         disabled={isAddingUser}
                       >
-                        {isAddingUser ? "Creating Account…" : "Create & Provision Account"}
+                        {isAddingUser ? "Provisioning…" : "Create & Provision"}
                       </Button>
                     </div>
                   </form>
                 </div>
               )}
 
-              {/* Members Table */}
-              <div className="glass-panel overflow-hidden rounded-3xl">
+              {/* Members Directory - Clean Glass List */}
+              <div className="glass-panel overflow-hidden rounded-3xl border-white/10 bg-zinc-950/60 shadow-2xl">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="border-b border-glass-border bg-glass-highlight text-xs uppercase tracking-wider text-muted-foreground">
+                  <table className="w-full text-left text-xs">
+                    <thead className="border-b border-white/10 bg-zinc-900/60 text-[11px] font-bold uppercase tracking-wider text-zinc-400">
                       <tr>
-                        <th className="px-6 py-4">Player / Staff Account</th>
-                        <th className="px-6 py-4">Current Role</th>
-                        <th className="px-6 py-4">Role Management</th>
-                        <th className="px-6 py-4 text-right">Actions</th>
+                        <th className="px-6 py-3.5">User Profile</th>
+                        <th className="px-6 py-3.5">Assigned Clearance</th>
+                        <th className="px-6 py-3.5">Change Role</th>
+                        <th className="px-6 py-3.5 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-glass-border">
+                    <tbody className="divide-y divide-white/5">
                       {filteredUsers.length === 0 ? (
                         <tr>
-                          <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">
+                          <td colSpan={4} className="px-6 py-12 text-center text-zinc-500">
                             No accounts match your current search or role filter.
                           </td>
                         </tr>
@@ -1656,25 +1745,25 @@ function ControlPanelPage() {
                             !isTargetChairman;
 
                           return (
-                            <tr key={u.id} className="transition hover:bg-glass-highlight">
-                              <td className="px-6 py-4">
+                            <tr key={u.id} className="transition-colors hover:bg-white/[0.02]">
+                              <td className="px-6 py-3.5">
                                 <div className="flex items-center gap-3">
                                   <div
-                                    className={`flex h-10 w-10 items-center justify-center rounded-xl border font-bold uppercase ${
+                                    className={`flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-bold uppercase shrink-0 ${
                                       isTargetChairman
-                                        ? "border-amber-500/50 bg-amber-500/15 text-amber-400"
+                                        ? "border-amber-500/50 bg-amber-500/15 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
                                         : isTargetFounder
-                                          ? "border-red-500/50 bg-red-500/15 text-red-400"
+                                          ? "border-red-500/50 bg-red-500/15 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.2)]"
                                           : u.role === "admin"
-                                            ? "border-purple-500/50 bg-purple-500/15 text-purple-400"
+                                            ? "border-purple-500/50 bg-purple-500/15 text-purple-300"
                                             : u.role === "staff"
-                                              ? "border-orange-500/50 bg-orange-500/15 text-orange-400"
-                                              : "border-glass-border bg-background/50 text-zinc-400"
+                                              ? "border-orange-500/50 bg-orange-500/15 text-orange-300"
+                                              : "border-white/10 bg-zinc-900 text-zinc-400"
                                     }`}
                                   >
                                     {isTargetChairman || isTargetFounder ? (
                                       <Crown
-                                        className={`h-5 w-5 ${
+                                        className={`h-4 w-4 ${
                                           isTargetChairman ? "text-amber-400" : "text-red-400"
                                         }`}
                                       />
@@ -1684,28 +1773,28 @@ function ControlPanelPage() {
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-2">
-                                      <span className="font-semibold text-foreground">
+                                      <span className="font-semibold text-zinc-100 text-xs">
                                         {u.display_name}
                                       </span>
                                       {isTargetChairman && (
-                                        <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.2 text-[10px] font-bold uppercase text-amber-400">
+                                        <span className="rounded-full border border-amber-500/40 bg-amber-500/15 px-2 py-0.2 text-[9px] font-extrabold uppercase text-amber-300">
                                           Chairman
                                         </span>
                                       )}
                                       {isTargetFounder && (
-                                        <span className="rounded-full border border-red-500/40 bg-red-500/10 px-2 py-0.2 text-[10px] font-bold uppercase text-red-400">
+                                        <span className="rounded-full border border-red-500/40 bg-red-500/15 px-2 py-0.2 text-[9px] font-extrabold uppercase text-red-300">
                                           Founder
                                         </span>
                                       )}
                                     </div>
-                                    <span className="text-xs text-muted-foreground">{u.email}</span>
+                                    <span className="text-[11px] text-zinc-400">{u.email}</span>
                                   </div>
                                 </div>
                               </td>
 
-                              <td className="px-6 py-4">
+                              <td className="px-6 py-3.5">
                                 <span
-                                  className={`status-pill ${
+                                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
                                     isTargetChairman
                                       ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
                                       : isTargetFounder
@@ -1714,14 +1803,14 @@ function ControlPanelPage() {
                                           ? "border-purple-500/40 bg-purple-500/10 text-purple-400"
                                           : u.role === "staff"
                                             ? "border-orange-500/40 bg-orange-500/10 text-orange-400"
-                                            : "border-muted-foreground/30 bg-muted/20 text-muted-foreground"
+                                            : "border-zinc-800 bg-zinc-900 text-zinc-400"
                                   }`}
                                 >
                                   {ROLE_LABEL[u.role]}
                                 </span>
                               </td>
 
-                              <td className="px-6 py-4">
+                              <td className="px-6 py-3.5">
                                 {canEditTarget ? (
                                   <Select
                                     value={u.role}
@@ -1729,11 +1818,13 @@ function ControlPanelPage() {
                                       handleRoleChange(u, newRole as AppRole)
                                     }
                                   >
-                                    <SelectTrigger className="w-[170px] rounded-xl border-glass-border bg-background/50">
+                                    <SelectTrigger className="w-[150px] h-8 rounded-xl border-white/10 bg-zinc-900/60 text-xs text-zinc-200">
                                       <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent>
-                                      {ROLES.map((r) => (
+                                    <SelectContent className="bg-zinc-900 border-zinc-800 text-xs">
+                                      {ROLES.filter(
+                                        (r) => r !== "chairman" || role === "chairman",
+                                      ).map((r) => (
                                         <SelectItem key={r} value={r}>
                                           {ROLE_LABEL[r]}
                                         </SelectItem>
@@ -1741,20 +1832,20 @@ function ControlPanelPage() {
                                     </SelectContent>
                                   </Select>
                                 ) : (
-                                  <span className="text-xs text-muted-foreground">
+                                  <span className="text-[11px] text-zinc-500">
                                     {canManageRoles(role)
-                                      ? "Higher Rank Protection"
-                                      : "Founder/Chairman Clearance Required to Edit"}
+                                      ? "Protected (Higher Rank)"
+                                      : "Clearance Required"}
                                   </span>
                                 )}
                               </td>
 
-                              <td className="px-6 py-4 text-right">
+                              <td className="px-6 py-3.5 text-right">
                                 {canDeleteTarget && (
                                   <Button
                                     variant="ghost"
-                                    size="sm"
-                                    className="rounded-xl text-rose-400 hover:bg-rose-500/10"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-xl text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                                     onClick={async () => {
                                       if (confirm(`Remove user ${u.email}?`)) {
                                         const res = await deleteUser(u.id);

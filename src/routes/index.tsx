@@ -86,18 +86,8 @@ function HomePage() {
             </div>
 
             {user && (
-              <div
-                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs ${
-                  user.role === "super_admin"
-                    ? "border-red-500/40 bg-red-500/10 text-red-400"
-                    : user.role === "admin"
-                      ? "border-purple-500/40 bg-purple-500/10 text-purple-400"
-                      : user.role === "staff"
-                        ? "border-orange-500/40 bg-orange-500/10 text-orange-400"
-                        : "border-zinc-700 bg-zinc-800/40 text-zinc-300"
-                }`}
-              >
-                <ShieldCheck className="h-3.5 w-3.5" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-800/60 px-3.5 py-1 text-xs text-zinc-300">
+                <ShieldCheck className="h-3.5 w-3.5 text-zinc-400" />
                 Signed in as <strong className="text-foreground">{user.display_name}</strong> (
                 {ROLE_LABEL[user.role]})
               </div>

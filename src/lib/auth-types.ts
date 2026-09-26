@@ -38,4 +38,5 @@ export type AppUser = {
   display_name: string;
   role: AppRole;
   created_at: string;
+  avatar_url?: string;
 };

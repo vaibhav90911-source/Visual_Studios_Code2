@@ -200,129 +200,118 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
   };
 
   return (
-    <div className="space-y-8">
-      {/* Top Header Card - Deep Black Theme */}
-      <section className="glass-panel relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-zinc-800 bg-black/95">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-purple-300">
-            <Award className="h-3.5 w-3.5 text-purple-400" />
-            <span>CONFIDENTIAL STAFF ACTIVITY AUDIT</span>
+    <div className="space-y-6">
+      {/* Top Header Glass Panel */}
+      <section className="glass-panel relative overflow-hidden rounded-3xl p-6 sm:p-7 border border-white/10 bg-zinc-950/60 backdrop-blur-xl">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-purple-300">
+                <Award className="h-3.5 w-3.5 text-purple-400" />
+                <span>Staff Activity Audit</span>
+              </div>
+              <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live Sync
+              </span>
+            </div>
+            <h1 className="mt-2 font-display text-2xl font-extrabold uppercase tracking-wide text-white sm:text-3xl">
+              Staff Analytics & VC Activity
+            </h1>
+            <p className="mt-1 text-xs text-muted-foreground max-w-2xl">
+              Track staff presence across studio voice channels, message velocity, and recording
+              session contributions.
+            </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {superAdmin && (
               <Button
                 onClick={() => setShowAddModal(true)}
-                className="rounded-full bg-purple-600 px-4 text-white shadow-lg shadow-purple-600/30 hover:bg-purple-500"
+                className="rounded-full bg-purple-600 px-4 text-xs font-semibold text-white shadow-lg shadow-purple-600/30 hover:bg-purple-500"
               >
-                <Plus className="mr-1.5 h-4 w-4" /> Add Staff Member
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Staff Member
               </Button>
             )}
             <Button
               variant="outline"
               size="sm"
               onClick={resetStaffToDefault}
-              className="rounded-full border-zinc-800 bg-zinc-900/50 text-xs text-zinc-400 hover:text-white"
+              className="rounded-full border-white/10 bg-zinc-900/60 text-xs text-zinc-400 hover:text-white"
               title="Reset sample data"
             >
-              <RefreshCw className="mr-1 h-3.5 w-3.5" /> Reset Default Data
+              <RefreshCw className="mr-1 h-3.5 w-3.5" /> Reset Data
             </Button>
           </div>
         </div>
 
-        <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-4">
-          <img
-            src={logo.url}
-            alt="Visual Studios Logo"
-            referrerPolicy="no-referrer"
-            className="h-14 sm:h-16 w-auto aspect-[16/9] rounded-2xl border border-zinc-800 bg-black object-contain shadow-lg shadow-black shrink-0 self-start sm:self-center"
-          />
-          <div>
-            <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight text-white sm:text-4xl">
-              Staff Analytics & Server Contribution
-            </h1>
-            <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-zinc-400">
-              Track individual staff presence, voice channel hours (with specific VC room
-              breakdown), messages sent, and see exactly how much work each staff member has
-              performed in Visual Studios.
-            </p>
-          </div>
-        </div>
-
-        {/* Founder Clearance Notice */}
-        {superAdmin ? (
-          <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs text-amber-300">
-            <ShieldCheck className="h-4 w-4 shrink-0 text-amber-400" />
-            <span>
-              <strong>Founder Clearance:</strong> You can add verified staff with their Discord User
-              ID, record VC hours, and log official server work contributions.
-            </span>
-          </div>
-        ) : (
-          <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2 text-xs text-zinc-400">
-            <Info className="h-4 w-4 shrink-0 text-purple-400" />
-            <span>
-              Staff activity metrics are maintained and verified by Founders & Managers. Sign in as
-              Founder to input or log data.
-            </span>
-          </div>
-        )}
-
-        {/* Top Server Stats Grid */}
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-5">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              <Users className="h-4 w-4 text-purple-400" />
-              <span>Real Staff</span>
+        {/* Top Stats Grid */}
+        <div className="mt-6 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+          <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-4 backdrop-blur-md">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Users className="h-3.5 w-3.5 text-purple-400" />
+              <span>Verified Staff</span>
             </div>
-            <div className="mt-2 text-3xl font-extrabold text-white">{staffList.length}</div>
-            <div className="mt-1 text-[11px] text-zinc-500">Verified crew members</div>
-          </div>
-
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-5">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              <Headphones className="h-4 w-4 text-purple-400" />
-              <span>Logged VC Time</span>
+            <div className="mt-2 font-display text-2xl font-extrabold text-white">
+              {staffList.length}
             </div>
-            <div className="mt-2 text-3xl font-extrabold text-white">{totalVcHoursAll}h</div>
-            <div className="mt-1 text-[11px] text-emerald-400">Across studio voice rooms</div>
+            <div className="mt-1 text-[11px] text-zinc-500">Active crew members</div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-5">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              <MessageSquare className="h-4 w-4 text-purple-400" />
+          <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-4 backdrop-blur-md">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Headphones className="h-3.5 w-3.5 text-purple-400" />
+              <span>VC Duration</span>
+            </div>
+            <div className="mt-2 font-display text-2xl font-extrabold text-white">
+              {totalVcHoursAll}h
+            </div>
+            <div className="mt-1 text-[11px] text-emerald-400 font-medium">
+              Recorded booth presence
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-4 backdrop-blur-md">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <MessageSquare className="h-3.5 w-3.5 text-purple-400" />
               <span>Messages Sent</span>
             </div>
-            <div className="mt-2 text-3xl font-extrabold text-white">{totalMessagesAll}</div>
+            <div className="mt-2 font-display text-2xl font-extrabold text-white">
+              {totalMessagesAll}
+            </div>
             <div className="mt-1 text-[11px] text-zinc-500">Server communications</div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-5">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              <Video className="h-4 w-4 text-purple-400" />
+          <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-4 backdrop-blur-md">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Video className="h-3.5 w-3.5 text-purple-400" />
               <span>Sessions Hosted</span>
             </div>
-            <div className="mt-2 text-3xl font-extrabold text-white">{totalRecordingsAll}</div>
-            <div className="mt-1 text-[11px] text-purple-400">Creator studio takes</div>
+            <div className="mt-2 font-display text-2xl font-extrabold text-white">
+              {totalRecordingsAll}
+            </div>
+            <div className="mt-1 text-[11px] text-purple-300 font-medium">
+              Completed studio takes
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Filter, Search and Sorting Bar */}
-      <section className="glass-card flex flex-col gap-4 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between border border-zinc-800 bg-zinc-950/90">
+      {/* Filter, Search & Sort Bar */}
+      <section className="glass-panel flex flex-col gap-3 rounded-2xl p-3.5 border border-white/10 bg-zinc-950/40 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by Staff Name, Discord Tag, or Discord User ID (Snowflake)..."
-            className="pl-10 rounded-xl border-zinc-800 bg-black/60 text-sm"
+            placeholder="Search by name, tag, or Discord ID..."
+            className="pl-9 h-9 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Role filter */}
-          <div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-zinc-800 bg-black/50 p-1">
+          {/* Role Filter Pills */}
+          <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-zinc-900/60 p-1">
             {(
               [
                 "ALL",
@@ -336,48 +325,48 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
               <button
                 key={r}
                 onClick={() => setRoleFilter(r)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
+                className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                   roleFilter === r
-                    ? "bg-purple-600 text-white shadow-sm"
-                    : "text-zinc-400 hover:text-white"
+                    ? "bg-purple-600 text-white shadow-sm shadow-purple-600/30"
+                    : "text-zinc-400 hover:text-white hover:bg-white/5"
                 }`}
               >
-                {r}
+                {r === "ALL" ? "All Roles" : r}
               </button>
             ))}
           </div>
 
-          {/* Sort by */}
-          <div className="flex items-center gap-1 rounded-xl border border-zinc-800 bg-black/50 p-1 text-xs text-zinc-400">
-            <span className="px-2 text-zinc-500">Sort:</span>
+          {/* Sort Selector */}
+          <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-zinc-900/60 p-1 text-xs text-zinc-400">
+            <span className="px-2 text-[11px] text-zinc-500 font-medium">Sort:</span>
             <button
               onClick={() => setSortBy("vc")}
-              className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                sortBy === "vc" ? "bg-zinc-800 text-white" : "hover:text-white"
+              className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                sortBy === "vc" ? "bg-white/10 text-white" : "hover:text-white"
               }`}
             >
               VC Hours
             </button>
             <button
               onClick={() => setSortBy("messages")}
-              className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                sortBy === "messages" ? "bg-zinc-800 text-white" : "hover:text-white"
+              className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                sortBy === "messages" ? "bg-white/10 text-white" : "hover:text-white"
               }`}
             >
               Messages
             </button>
             <button
               onClick={() => setSortBy("recordings")}
-              className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                sortBy === "recordings" ? "bg-zinc-800 text-white" : "hover:text-white"
+              className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                sortBy === "recordings" ? "bg-white/10 text-white" : "hover:text-white"
               }`}
             >
               Recordings
             </button>
             <button
               onClick={() => setSortBy("score")}
-              className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                sortBy === "score" ? "bg-zinc-800 text-white" : "hover:text-white"
+              className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                sortBy === "score" ? "bg-white/10 text-white" : "hover:text-white"
               }`}
             >
               Score
@@ -389,19 +378,19 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
       {/* Staff Members Grid */}
       <section className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-base font-bold uppercase tracking-wider text-white">
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
             Staff Team Dossiers ({filteredStaff.length})
           </h2>
-          <span className="text-xs text-zinc-500">
-            Click any staff to inspect full voice channel & contribution logs
+          <span className="text-[11px] text-zinc-500">
+            Click any staff card to inspect voice logs & contribution details
           </span>
         </div>
 
         {filteredStaff.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-800 bg-black/40 p-12 text-center">
+          <div className="glass-panel rounded-3xl border border-dashed border-white/10 bg-zinc-950/40 p-12 text-center">
             <Users className="mx-auto h-8 w-8 text-zinc-600" />
-            <h3 className="mt-3 text-base font-bold text-white">No staff members listed yet</h3>
-            <p className="mt-1 text-xs text-zinc-400 max-w-md mx-auto">
+            <h3 className="mt-3 text-sm font-bold text-white">No staff members listed</h3>
+            <p className="mt-1 text-xs text-muted-foreground max-w-md mx-auto">
               Register verified staff members with their Discord User ID to track voice channel
               hours and server contributions.
             </p>
@@ -420,7 +409,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
               <div
                 key={staff.id}
                 onClick={() => setSelectedStaff(staff)}
-                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/90 p-5 backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-purple-500/50 hover:bg-black hover:shadow-xl hover:shadow-purple-950/20"
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/40 p-5 backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-purple-500/40 hover:bg-zinc-900/70 hover:shadow-xl hover:shadow-purple-950/20"
               >
                 {/* Top Bar: Avatar, Names, Role */}
                 <div className="flex items-start gap-3.5">
@@ -428,11 +417,11 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     <img
                       src={staff.avatarUrl}
                       alt={staff.displayName}
-                      className="h-12 w-12 rounded-xl border border-zinc-800 object-cover"
+                      className="h-11 w-11 rounded-xl border border-white/10 object-cover"
                     />
                     {staff.status === "In Voice" && (
                       <span
-                        className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-black"
+                        className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-zinc-950"
                         title="In Voice"
                       >
                         <Radio className="h-2.5 w-2.5 text-white animate-pulse" />
@@ -446,16 +435,16 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                         {staff.displayName}
                       </h3>
                       <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                        className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
                           staff.role === "Founder"
-                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            ? "bg-amber-500/10 text-amber-300 border border-amber-500/30"
                             : staff.role === "Manager"
-                              ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                              ? "bg-purple-500/10 text-purple-300 border border-purple-500/30"
                               : staff.role === "Recording Manager"
-                                ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                                ? "bg-blue-500/10 text-blue-300 border border-blue-500/30"
                                 : staff.role === "Recording Team"
-                                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                                  : "bg-zinc-800 text-zinc-300 border border-zinc-700"
+                                  ? "bg-cyan-500/10 text-cyan-300 border border-cyan-500/30"
+                                  : "bg-zinc-800/60 text-zinc-300 border border-zinc-700/50"
                         }`}
                       >
                         {staff.role}
@@ -467,7 +456,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     {/* Discord Snowflake ID with 1-click copy */}
                     <button
                       onClick={(e) => handleCopyDiscordId(staff.discordUserId, e)}
-                      className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[11px] font-mono text-zinc-400 hover:bg-zinc-800 hover:text-white transition"
+                      className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-zinc-950/60 border border-white/10 px-2 py-0.5 text-[11px] font-mono text-zinc-400 hover:border-purple-500/40 hover:text-white transition"
                       title="Click to copy Discord User ID"
                     >
                       <span>ID: {staff.discordUserId}</span>
@@ -481,7 +470,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                 </div>
 
                 {/* Primary Stats Grid */}
-                <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-black/60 border border-zinc-800/80 p-2.5 text-center">
+                <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-zinc-950/60 border border-white/5 p-2.5 text-center">
                   <div>
                     <div className="flex items-center justify-center gap-1 text-[10px] uppercase font-semibold text-zinc-400">
                       <Headphones className="h-3 w-3 text-purple-400" />
@@ -520,7 +509,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                       <Volume2 className="h-3 w-3 text-purple-400" />
                       <span>Top Voice Channels:</span>
                     </span>
-                    <span className="text-[10px] text-purple-400/80">
+                    <span className="text-[10px] text-purple-300 font-medium">
                       {staff.vcBreakdown.length} rooms
                     </span>
                   </div>
@@ -528,7 +517,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     {staff.vcBreakdown.slice(0, 2).map((vc, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-1 rounded-md border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[10px] text-zinc-300"
+                        className="inline-flex items-center gap-1 rounded-md border border-white/5 bg-zinc-950/60 px-2 py-0.5 text-[10px] text-zinc-300"
                       >
                         <span className="truncate max-w-[120px]">{vc.channelName}</span>
                         <strong className="text-white font-mono">{vc.hours}h</strong>
@@ -543,13 +532,13 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                 </div>
 
                 {/* Work Rating & Summary line */}
-                <div className="mt-3.5 flex items-center justify-between border-t border-zinc-800 pt-3 text-xs">
-                  <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+                <div className="mt-3.5 flex items-center justify-between border-t border-white/5 pt-3 text-xs">
+                  <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold text-[11px]">
                     <Sparkles className="h-3 w-3" />
                     {staff.work.performanceRating} ({staff.work.activityScore}%)
                   </span>
 
-                  <span className="inline-flex items-center gap-1 text-purple-400 group-hover:translate-x-0.5 transition font-medium">
+                  <span className="inline-flex items-center gap-1 text-purple-300 group-hover:translate-x-0.5 transition text-[11px] font-medium">
                     Inspect Work <ArrowRight className="h-3 w-3" />
                   </span>
                 </div>
@@ -557,7 +546,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                 {/* Quick Founder Actions */}
                 {superAdmin && (
                   <div
-                    className="mt-3 flex items-center gap-1.5 border-t border-zinc-800 pt-2"
+                    className="mt-3 flex items-center gap-1.5 border-t border-white/5 pt-2"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Button
@@ -593,15 +582,15 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
 
       {/* Detailed Staff Inspection Modal */}
       {selectedStaff && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-fade-in">
           <div
-            className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-zinc-800 bg-black p-6 sm:p-8 text-foreground shadow-2xl"
+            className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-white/10 bg-zinc-950 p-6 sm:p-8 text-foreground shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={() => setSelectedStaff(null)}
-              className="absolute right-5 top-5 rounded-full border border-zinc-800 bg-zinc-900 p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white transition"
+              className="absolute right-5 top-5 rounded-full border border-white/10 bg-zinc-900/80 p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white transition"
             >
               ✕
             </button>
@@ -611,7 +600,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
               <img
                 src={selectedStaff.avatarUrl}
                 alt={selectedStaff.displayName}
-                className="h-16 w-16 rounded-2xl border border-zinc-800 object-cover"
+                className="h-16 w-16 rounded-2xl border border-white/10 object-cover"
               />
               <div>
                 <div className="flex items-center gap-2">
@@ -627,7 +616,9 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                   <span>•</span>
                   <span>Joined Studio: {selectedStaff.joinedAt}</span>
                   <span>•</span>
-                  <span className="text-emerald-400">Status: {selectedStaff.status}</span>
+                  <span className="text-emerald-400 font-medium">
+                    Status: {selectedStaff.status}
+                  </span>
                 </div>
 
                 {/* Copyable Discord Snowflake User ID */}
@@ -637,7 +628,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                   </span>
                   <button
                     onClick={() => handleCopyDiscordId(selectedStaff.discordUserId)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1 font-mono text-xs text-purple-300 hover:border-purple-500/40 hover:bg-zinc-800 transition"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-zinc-900/60 px-2.5 py-1 font-mono text-xs text-purple-300 hover:border-purple-500/40 hover:bg-zinc-800 transition"
                     title="Copy Discord User ID"
                   >
                     <span>{selectedStaff.discordUserId}</span>
@@ -652,61 +643,61 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
             </div>
 
             {/* Work & Contribution Spotlight */}
-            <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
+            <div className="mt-6 rounded-2xl border border-white/10 bg-zinc-900/40 p-5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-purple-300">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-300">
                   <Award className="h-4 w-4" />
                   <span>Server Work & Contribution Summary</span>
                 </div>
-                <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-0.5 text-xs font-bold text-emerald-300">
+                <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-0.5 text-xs font-bold text-emerald-300">
                   {selectedStaff.work.performanceRating} ({selectedStaff.work.activityScore}%)
                 </span>
               </div>
 
-              <p className="mt-3 text-sm leading-relaxed text-zinc-300">
+              <p className="mt-3 text-xs leading-relaxed text-zinc-300">
                 {selectedStaff.work.notes}
               </p>
 
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="rounded-xl bg-black p-3 text-center border border-zinc-800">
-                  <div className="text-[11px] uppercase font-semibold text-zinc-400">
+                <div className="rounded-xl bg-zinc-950/60 p-3 text-center border border-white/5">
+                  <div className="text-[10px] uppercase font-semibold text-zinc-400">
                     Recordings Hosted
                   </div>
-                  <div className="mt-1 text-2xl font-extrabold text-white">
+                  <div className="mt-1 text-xl font-extrabold text-white">
                     {selectedStaff.work.recordingsHosted}
                   </div>
                 </div>
-                <div className="rounded-xl bg-black p-3 text-center border border-zinc-800">
-                  <div className="text-[11px] uppercase font-semibold text-zinc-400">
+                <div className="rounded-xl bg-zinc-950/60 p-3 text-center border border-white/5">
+                  <div className="text-[10px] uppercase font-semibold text-zinc-400">
                     Takes Supervised
                   </div>
-                  <div className="mt-1 text-2xl font-extrabold text-white">
+                  <div className="mt-1 text-xl font-extrabold text-white">
                     {selectedStaff.work.takesSupervised}
                   </div>
                 </div>
-                <div className="rounded-xl bg-black p-3 text-center border border-zinc-800">
-                  <div className="text-[11px] uppercase font-semibold text-zinc-400">
+                <div className="rounded-xl bg-zinc-950/60 p-3 text-center border border-white/5">
+                  <div className="text-[10px] uppercase font-semibold text-zinc-400">
                     Tickets Resolved
                   </div>
-                  <div className="mt-1 text-2xl font-extrabold text-white">
+                  <div className="mt-1 text-xl font-extrabold text-white">
                     {selectedStaff.work.ticketsResolved}
                   </div>
                 </div>
-                <div className="rounded-xl bg-black p-3 text-center border border-zinc-800">
-                  <div className="text-[11px] uppercase font-semibold text-zinc-400">
+                <div className="rounded-xl bg-zinc-950/60 p-3 text-center border border-white/5">
+                  <div className="text-[10px] uppercase font-semibold text-zinc-400">
                     Total Voice Logged
                   </div>
-                  <div className="mt-1 text-2xl font-extrabold text-white">
+                  <div className="mt-1 text-xl font-extrabold text-white">
                     {selectedStaff.totalVcHours}h
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Voice Channel (VC) Breakdown Table with VC Names */}
+            {/* Voice Channel (VC) Breakdown Table */}
             <div className="mt-6 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white">
                   <Headphones className="h-4 w-4 text-purple-400" />
                   <span>Voice Channel (VC) Presence & Duration</span>
                 </div>
@@ -715,32 +706,32 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                 </span>
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950">
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/40">
                 <table className="w-full text-left text-xs">
-                  <thead className="border-b border-zinc-800 bg-black/60 text-[11px] uppercase tracking-wider text-zinc-400">
+                  <thead className="border-b border-white/10 bg-zinc-900/80 text-[10px] uppercase tracking-wider text-zinc-400">
                     <tr>
-                      <th className="p-3.5 font-semibold">Voice Channel Name</th>
-                      <th className="p-3.5 font-semibold">Hours Logged</th>
-                      <th className="p-3.5 font-semibold">Sessions</th>
-                      <th className="p-3.5 font-semibold">Voice Share</th>
-                      <th className="p-3.5 font-semibold">Last Active</th>
+                      <th className="p-3 font-semibold">Voice Channel Name</th>
+                      <th className="p-3 font-semibold">Hours Logged</th>
+                      <th className="p-3 font-semibold">Sessions</th>
+                      <th className="p-3 font-semibold">Voice Share</th>
+                      <th className="p-3 font-semibold">Last Active</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-800/80">
+                  <tbody className="divide-y divide-white/5">
                     {selectedStaff.vcBreakdown.map((vc, idx) => {
                       const pct =
                         selectedStaff.totalVcHours > 0
                           ? Math.round((vc.hours / selectedStaff.totalVcHours) * 100)
                           : 0;
                       return (
-                        <tr key={idx} className="hover:bg-zinc-900/50 transition">
-                          <td className="p-3.5 font-medium text-white flex items-center gap-2">
+                        <tr key={idx} className="hover:bg-white/[0.02] transition">
+                          <td className="p-3 font-medium text-white flex items-center gap-2">
                             <Volume2 className="h-3.5 w-3.5 text-purple-400 shrink-0" />
                             <span>{vc.channelName}</span>
                           </td>
-                          <td className="p-3.5 font-mono font-bold text-purple-300">{vc.hours}h</td>
-                          <td className="p-3.5 font-mono text-zinc-400">{vc.sessionsCount}</td>
-                          <td className="p-3.5">
+                          <td className="p-3 font-mono font-bold text-purple-300">{vc.hours}h</td>
+                          <td className="p-3 font-mono text-zinc-400">{vc.sessionsCount}</td>
+                          <td className="p-3">
                             <div className="flex items-center gap-2">
                               <div className="h-1.5 w-16 overflow-hidden rounded-full bg-zinc-800">
                                 <div
@@ -751,7 +742,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                               <span className="font-mono text-zinc-400">{pct}%</span>
                             </div>
                           </td>
-                          <td className="p-3.5 text-zinc-400">{vc.lastActive}</td>
+                          <td className="p-3 text-zinc-400">{vc.lastActive}</td>
                         </tr>
                       );
                     })}
@@ -763,7 +754,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
             {/* Recent Work Logs List */}
             <div className="mt-6 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white">
                   <Video className="h-4 w-4 text-purple-400" />
                   <span>Recent Work Logs & Takes Completed</span>
                 </div>
@@ -786,12 +777,12 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                   selectedStaff.work.recentWorkLogs.map((log) => (
                     <div
                       key={log.id}
-                      className="flex items-start justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3.5"
+                      className="flex items-start justify-between gap-3 rounded-xl border border-white/5 bg-zinc-900/30 p-3.5"
                     >
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-white text-xs">{log.task}</span>
-                          <span className="rounded-full bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400">
+                          <span className="rounded-full bg-zinc-900 border border-white/10 px-2 py-0.5 text-[10px] text-zinc-400">
                             {log.date}
                           </span>
                         </div>
@@ -813,12 +804,12 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
 
       {/* Add Staff Modal (Founder / Manager) */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-fade-in">
           <div
-            className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-zinc-800 bg-black p-6 sm:p-8 text-foreground shadow-2xl"
+            className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-zinc-950 p-6 sm:p-8 text-foreground shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h3 className="font-display text-xl font-bold uppercase text-white">
                   Add Staff Member
@@ -845,7 +836,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                   placeholder="e.g. 694201948271049281"
                   value={newStaff.discordUserId}
                   onChange={(e) => setNewStaff({ ...newStaff, discordUserId: e.target.value })}
-                  className="mt-1 rounded-xl border-zinc-800 bg-zinc-950 font-mono"
+                  className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 font-mono text-xs"
                 />
                 <p className="mt-1 text-[11px] text-zinc-500">
                   Right-click user on Discord → "Copy User ID" (requires Developer Mode).
@@ -862,7 +853,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     placeholder="Staff member name"
                     value={newStaff.displayName}
                     onChange={(e) => setNewStaff({ ...newStaff, displayName: e.target.value })}
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
                 <div>
@@ -873,7 +864,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     placeholder="e.g. username#0000"
                     value={newStaff.discordTag}
                     onChange={(e) => setNewStaff({ ...newStaff, discordTag: e.target.value })}
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
               </div>
@@ -885,7 +876,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                 <select
                   value={newStaff.role}
                   onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value as StaffRole })}
-                  className="mt-1 w-full rounded-xl border border-zinc-800 bg-zinc-950 p-2.5 text-xs text-white"
+                  className="mt-1 w-full rounded-xl border border-white/10 bg-zinc-900/60 p-2.5 text-xs text-white"
                 >
                   <option value="Recording Team">Recording Team</option>
                   <option value="Recording Support">Recording Support</option>
@@ -904,7 +895,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     placeholder="🎙️ Recording Booth #1"
                     value={newStaff.primaryVcName}
                     onChange={(e) => setNewStaff({ ...newStaff, primaryVcName: e.target.value })}
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
                 <div>
@@ -919,7 +910,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     onChange={(e) =>
                       setNewStaff({ ...newStaff, initialVcHours: Number(e.target.value) })
                     }
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
               </div>
@@ -936,7 +927,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     onChange={(e) =>
                       setNewStaff({ ...newStaff, initialMessages: Number(e.target.value) })
                     }
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
                 <div>
@@ -950,7 +941,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     onChange={(e) =>
                       setNewStaff({ ...newStaff, takesSupervised: Number(e.target.value) })
                     }
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
                 <div>
@@ -964,7 +955,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     onChange={(e) =>
                       setNewStaff({ ...newStaff, ticketsResolved: Number(e.target.value) })
                     }
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
               </div>
@@ -978,7 +969,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                   value={newStaff.notes}
                   onChange={(e) => setNewStaff({ ...newStaff, notes: e.target.value })}
                   rows={2}
-                  className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                  className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                 />
               </div>
 
@@ -986,14 +977,14 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                 <Button
                   type="button"
                   variant="outline"
-                  className="rounded-full border-zinc-800"
+                  className="rounded-full border-white/10 text-xs"
                   onClick={() => setShowAddModal(false)}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="rounded-full bg-purple-600 px-6 text-white hover:bg-purple-500"
+                  className="rounded-full bg-purple-600 px-6 text-xs text-white hover:bg-purple-500"
                 >
                   Add Staff Member
                 </Button>
@@ -1005,12 +996,12 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
 
       {/* Log VC Modal */}
       {showLogVcModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-fade-in">
           <div
-            className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-zinc-800 bg-black p-6 sm:p-7 text-foreground shadow-2xl"
+            className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-white/10 bg-zinc-950 p-6 sm:p-7 text-foreground shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div>
                 <h3 className="font-display text-lg font-bold text-white">
                   Log Voice Channel Duration
@@ -1033,7 +1024,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                 <select
                   value={vcInputChannel}
                   onChange={(e) => setVcInputChannel(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-zinc-800 bg-zinc-950 p-2.5 text-xs text-white"
+                  className="mt-1 w-full rounded-xl border border-white/10 bg-zinc-900/60 p-2.5 text-xs text-white"
                 >
                   <option value="🎙️ Recording Booth #1">🎙️ Recording Booth #1</option>
                   <option value="🎙️ Recording Booth #2">🎙️ Recording Booth #2</option>
@@ -1055,7 +1046,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                   max="24"
                   value={vcInputHours}
                   onChange={(e) => setVcInputHours(Number(e.target.value))}
-                  className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                  className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                 />
               </div>
 
@@ -1067,7 +1058,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                   placeholder="e.g. Supervised Saturday SMP Recording take #4"
                   value={vcInputNotes}
                   onChange={(e) => setVcInputNotes(e.target.value)}
-                  className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                  className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                 />
               </div>
 
@@ -1075,14 +1066,14 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                 <Button
                   type="button"
                   variant="outline"
-                  className="rounded-full border-zinc-800"
+                  className="rounded-full border-white/10 text-xs"
                   onClick={() => setShowLogVcModal(null)}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="rounded-full bg-purple-600 px-6 text-white hover:bg-purple-500"
+                  className="rounded-full bg-purple-600 px-6 text-xs text-white hover:bg-purple-500"
                 >
                   Log Voice Hours
                 </Button>
@@ -1094,12 +1085,12 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
 
       {/* Log Work Modal */}
       {showLogWorkModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-fade-in">
           <div
-            className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-zinc-800 bg-black p-6 sm:p-7 text-foreground shadow-2xl"
+            className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-white/10 bg-zinc-950 p-6 sm:p-7 text-foreground shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div>
                 <h3 className="font-display text-lg font-bold text-white">Log Server Work</h3>
                 <p className="text-xs text-zinc-400">for {showLogWorkModal.displayName}</p>
@@ -1122,7 +1113,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                   placeholder="e.g. Hosted Creator Audition Batch"
                   value={workTask}
                   onChange={(e) => setWorkTask(e.target.value)}
-                  className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                  className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                 />
               </div>
 
@@ -1135,7 +1126,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                   value={workDetails}
                   onChange={(e) => setWorkDetails(e.target.value)}
                   rows={2}
-                  className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                  className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                 />
               </div>
 
@@ -1149,7 +1140,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     min="0"
                     value={workRecordings}
                     onChange={(e) => setWorkRecordings(Number(e.target.value))}
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
                 <div>
@@ -1161,7 +1152,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     min="0"
                     value={workTakes}
                     onChange={(e) => setWorkTakes(Number(e.target.value))}
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
                 <div>
@@ -1174,7 +1165,7 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                     min="0"
                     value={workHours}
                     onChange={(e) => setWorkHours(Number(e.target.value))}
-                    className="mt-1 rounded-xl border-zinc-800 bg-zinc-950"
+                    className="mt-1 rounded-xl border-white/10 bg-zinc-900/60 text-xs"
                   />
                 </div>
               </div>
@@ -1183,14 +1174,14 @@ export function StaffAnalyticsManager({ embedded = false }: StaffAnalyticsManage
                 <Button
                   type="button"
                   variant="outline"
-                  className="rounded-full border-zinc-800"
+                  className="rounded-full border-white/10 text-xs"
                   onClick={() => setShowLogWorkModal(null)}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="rounded-full bg-emerald-600 px-6 text-white hover:bg-emerald-500"
+                  className="rounded-full bg-emerald-600 px-6 text-xs text-white hover:bg-emerald-500"
                 >
                   Record Work
                 </Button>

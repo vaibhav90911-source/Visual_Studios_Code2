@@ -261,3 +261,58 @@ export function resetLocalUserPassword(
   saveStoredUsers(users);
   return { success: true };
 }
+
+export function updateLocalUserProfile(
+  userId: string,
+  updates: {
+    displayName?: string;
+    avatarUrl?: string;
+    currentPassword?: string;
+    newPassword?: string;
+    password?: string;
+  },
+): { success: boolean; user?: AppUser; error?: string } {
+  const users = getStoredUsers();
+  const normalized = userId.trim().toLowerCase();
+  const user = users.find((u) => u.id === userId || u.email.toLowerCase() === normalized);
+
+  if (!user) {
+    return { success: false, error: "No account found matching this user ID." };
+  }
+
+  const targetPassword = updates.newPassword || updates.password;
+
+  if (targetPassword) {
+    if (updates.currentPassword && user.passwordHash !== updates.currentPassword) {
+      return { success: false, error: "Incorrect current password. Please try again." };
+    }
+    if (targetPassword.length < 6) {
+      return { success: false, error: "New password must be at least 6 characters long." };
+    }
+    user.passwordHash = targetPassword;
+  }
+
+  if (updates.displayName && updates.displayName.trim()) {
+    user.display_name = updates.displayName.trim();
+  }
+
+  if (updates.avatarUrl !== undefined) {
+    user.avatar_url = updates.avatarUrl;
+  }
+
+  saveStoredUsers(users);
+
+  const { passwordHash: _, ...safeUser } = user;
+
+  // Also sync current active local session if matches
+  const currentSession = getCurrentLocalSession();
+  if (
+    currentSession &&
+    (currentSession.id === user.id ||
+      currentSession.email.toLowerCase() === user.email.toLowerCase())
+  ) {
+    setCurrentLocalSession(safeUser);
+  }
+
+  return { success: true, user: safeUser };
+}

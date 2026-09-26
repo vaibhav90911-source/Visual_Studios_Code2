@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowRight, Mail, ShieldCheck, LogOut } from "lucide-react";
+import { ArrowRight, Mail, ShieldCheck, LogOut, User } from "lucide-react";
 
 import logo from "@/assets/vs-logo.png.asset.json";
 import { SiteLayout } from "@/components/SiteLayout";
@@ -177,21 +177,31 @@ function AuthPage() {
                   <Link to="/">Go to Homepage</Link>
                 </Button>
 
+                <Button
+                  asChild
+                  variant="secondary"
+                  className="rounded-full border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-200"
+                >
+                  <Link to="/account">
+                    <User className="mr-1.5 h-4 w-4 text-purple-400" /> Account Settings
+                  </Link>
+                </Button>
+
                 {isStaffOrAbove(role) && (
-                  <Button asChild variant="secondary" className="rounded-full">
+                  <Button asChild variant="outline" className="rounded-full">
                     <Link to="/panel">Open Control Panel</Link>
                   </Button>
                 )}
 
                 <Button
                   variant="outline"
-                  className="rounded-full"
+                  className="rounded-full text-rose-400 hover:text-rose-300 border-rose-500/30 hover:bg-rose-950/20"
                   onClick={async () => {
                     await signOut();
                     toast.success("You have been signed out.");
                   }}
                 >
-                  <LogOut className="mr-1.5 h-4 w-4" /> Sign out
+                  <LogOut className="mr-1.5 h-4 w-4 text-rose-400" /> Sign out
                 </Button>
               </div>
             </div>

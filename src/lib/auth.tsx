@@ -16,6 +16,8 @@ import {
   type AppRole,
   type AppUser,
   ROLE_LABEL,
+  ROLE_THEME,
+  getRoleTheme,
   ROLES,
   RANK,
   isStaffOrAbove,
@@ -32,6 +34,7 @@ import {
   getStoredUsers,
   saveStoredUsers,
   updateUserRoleInStorage,
+  updateLocalUserProfile,
   deleteUserFromStorage,
   recordPasswordResetRequest,
   resetLocalUserPassword,
@@ -42,6 +45,7 @@ import {
   serverAuthenticateUser,
   serverRegisterUser,
   serverUpdateUserRole,
+  serverUpdateProfile,
   serverDeleteUser,
   serverResetPassword,
 } from "./auth-server";
@@ -88,6 +92,13 @@ type AuthContextType = {
     displayName: string,
     requestedRole?: AppRole,
   ) => Promise<{ success: boolean; error?: string }>;
+  updateProfile: (data: {
+    displayName?: string;
+    avatarUrl?: string;
+    currentPassword?: string;
+    newPassword?: string;
+    password?: string;
+  }) => Promise<{ success: boolean; error?: string }>;
   allUsers: AppUser[];
   refreshUsers: () => void;
 };
@@ -105,6 +116,7 @@ const AuthContext = createContext<AuthContextType>({
   updateUserRole: async () => ({ success: false }),
   deleteUser: async () => ({ success: false }),
   createUser: async () => ({ success: false }),
+  updateProfile: async () => ({ success: false }),
   allUsers: [],
   refreshUsers: () => {},
 });
@@ -790,6 +802,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res;
   };
 
+  const updateProfile = async (data: {
+    displayName?: string;
+    avatarUrl?: string;
+    currentPassword?: string;
+    newPassword?: string;
+    password?: string;
+  }): Promise<{ success: boolean; error?: string }> => {
+    const activeUser = userRef.current || user;
+    if (!activeUser) return { success: false, error: "Not authenticated" };
+
+    const res = updateLocalUserProfile(activeUser.id, data);
+    if (!res.success) return res;
+
+    if (res.user) {
+      setUser(res.user);
+    }
+
+    try {
+      await serverUpdateProfile({
+        data: {
+          userId: activeUser.id,
+          displayName: data.displayName,
+          avatarUrl: data.avatarUrl,
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword || data.password,
+        },
+      });
+    } catch (serverErr) {
+      console.warn("[Auth] Server update profile error:", serverErr);
+    }
+
+    try {
+      const updatesDoc: Record<string, unknown> = {};
+      if (data.displayName) updatesDoc["display_name"] = data.displayName;
+      if (data.avatarUrl !== undefined) updatesDoc["avatar_url"] = data.avatarUrl;
+      if (Object.keys(updatesDoc).length > 0) {
+        await setDoc(doc(db, "users", activeUser.id), updatesDoc, { merge: true });
+      }
+    } catch (e) {
+      console.warn("[Auth] Firestore update profile notice:", e);
+    }
+
+    broadcastSync();
+    void refreshUsers();
+    return { success: true };
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -805,6 +864,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateUserRole,
         deleteUser,
         createUser,
+        updateProfile,
         allUsers,
         refreshUsers,
       }}
